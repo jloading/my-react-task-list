@@ -1,19 +1,33 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import TaskList from './components/TaskList';
 
 function App() {
-    const [tasks, setTasks] = useState([
-        { id: 1, name: 'Curso Ada', completed: false },
-        { id: 2, name: 'Mi primera lista', completed: false },
-        { id: 3, name: 'Probando', completed: false },
-        { id: 4, name: 'Laboratorio 1', completed: false }
-    ]);
+    const initialTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const [tasks, setTasks] = useState(initialTasks);
 
-    const toggleTaskStatus = (id) => {
+    useEffect(() => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }, [tasks]);
+
+    const addTask = (title, description) => {
+        const newTask = {
+            id: Date.now(),
+            title,
+            description,
+            completed: false
+        };
+        setTasks([...tasks, newTask]);
+    };
+
+    const deleteTask = (id) => {
+        const updatedTasks = tasks.filter(task => task.id !== id);
+        setTasks(updatedTasks);
+    };
+
+    const editTask = (id, newTitle, newDescription) => {
         const updatedTasks = tasks.map(task => 
-            task.id === id ? { ...task, completed: !task.completed } : task
+            task.id === id ? { ...task, title: newTitle, description: newDescription } : task
         );
         setTasks(updatedTasks);
     };
@@ -21,7 +35,7 @@ function App() {
     return (
         <div className="app">
             <Header />
-            <TaskList tasks={tasks} onToggleTask={toggleTaskStatus} />
+            <TaskList tasks={tasks} onAddTask={addTask} onDeleteTask={deleteTask} onEditTask={editTask} />
         </div>
     );
 }
